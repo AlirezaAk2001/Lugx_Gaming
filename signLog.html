@@ -27,6 +27,7 @@
       justify-content: center;
       height: 100vh;
       padding: 10px;
+      overflow: hidden;
     }
 
     .form-wrapper {
@@ -71,26 +72,26 @@
 
     .auth-form input {
       width: 100%;
-      padding: 5px;
-      margin: 14px 0;
+      padding: 8px 1px;
+      margin: 8px 0;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       background: #1e1b3a;
       color: white;
-      font-size: 1rem;
+      font-size: 0.95rem;
       outline-offset: 2px;
     }
 
     .auth-form button {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       background-color: #8a2be2;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
       color: white;
       font-weight: bold;
-      font-size: 1.1rem;
+      font-size: 1rem;
       margin-top: 10px;
       transition: background-color 0.3s ease;
     }
@@ -122,6 +123,28 @@
     p.switch-text a:hover {
       color: #f2e9ff;
       text-shadow: 0 0 14px #dbcaff;
+    }
+
+    .form-row {
+      display: flex !important;
+      flex-direction: row !important;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .form-row input {
+      flex: 1;
+    }
+
+    .form-pass {
+      display: flex !important;
+      flex-direction: row !important;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .form-pass input {
+      flex: 1;
     }
 
     .form-container {
@@ -204,6 +227,18 @@
         width: 90vw;
       }
     }
+
+    @media (max-width: 500px) {
+      .form-row {
+      flex-direction: column;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .form-pas {
+      flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body>
@@ -240,13 +275,17 @@
     <div class="form-wrapper">
       <form id="signupForm" class="auth-form" novalidate>
         <h2>Sign Up</h2>
-        <input type="text" id="firstName" placeholder="First Name" required />
-        <input type="text" id="lastName" placeholder="Last Name" required />
+        <div class="form-row">
+          <input type="text" id="firstName" placeholder="First Name" required />
+          <input type="text" id="lastName" placeholder="Last Name" required />
+        </div>
         <input type="date" id="birthdate" placeholder="Date of Birth" required />
         <input type="email" id="email" placeholder="Email" required />
         <input type="text" id="signupUsername" placeholder="Username" required />
-        <input type="password" id="signupPassword" placeholder="Password" required />
-        <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+        <div class="form-pass">
+          <input type="password" id="signupPassword" placeholder="Password" required />
+          <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+        </div>
         <button id="signupBtn" type="submit">Register</button>
 
         <div class="social-login">
