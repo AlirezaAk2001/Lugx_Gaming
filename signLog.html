@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign In / Sign Up - Neon Forms with MockAPI</title>
+
+  <!-- Axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- FontAwesome -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 10px;
+    }
+
+    .form-wrapper {
+      position: relative;
+      width: 380px;
+      padding: 3px;
+      border-radius: 20px;
+      margin: 0 auto;
+      background-color: transparent;
+      box-sizing: border-box;
+      z-index: 1;
+    }
+
+    .form-wrapper::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      background: conic-gradient(from 0deg, #ff00cc, #3333ff, #00ffff, #ff00cc);
+      z-index: -1;
+      border-radius: 20px;
+      animation: rotateBorder 4s linear infinite;
+      filter: drop-shadow(0 0 10px #ff00cc)
+              drop-shadow(0 0 10px #3333ff)
+              drop-shadow(0 0 10px #00ffff);
+    }
+
+    @keyframes rotateBorder {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .auth-form {
+      background-color: #0f0123;
+      border-radius: 17px;
+      padding: 30px 25px;
+      text-align: center;
+      color: white;
+    }
+
+    .auth-form input {
+      width: 100%;
+      padding: 5px;
+      margin: 14px 0;
+      border: none;
+      border-radius: 8px;
+      background: #1e1b3a;
+      color: white;
+      font-size: 1rem;
+      outline-offset: 2px;
+    }
+
+    .auth-form button {
+      width: 100%;
+      padding: 12px;
+      background-color: #8a2be2;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-top: 10px;
+      transition: background-color 0.3s ease;
+    }
+
+    .auth-form button:disabled {
+      background-color: #444;
+      cursor: not-allowed;
+    }
+
+    .auth-form button:hover:not(:disabled) {
+      background-color: #b497f7;
+    }
+
+    p.switch-text {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #c3b3ff;
+    }
+
+    p.switch-text a {
+      color: #e0d4ff;
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+      text-shadow: 0 0 8px #8a2be2;
+      transition: color 0.3s;
+    }
+
+    p.switch-text a:hover {
+      color: #f2e9ff;
+      text-shadow: 0 0 14px #dbcaff;
+    }
+
+    .form-container {
+      display: none;
+    }
+
+    .form-container.active {
+      display: block;
+    }
+
+    .social-login {
+      margin: 20px 0 0;
+      text-align: center;
+    }
+
+    .social-login p {
+      margin-bottom: 12px;
+      font-weight: 600;
+      color: #bbaaff;
+      user-select: none;
+    }
+
+    .social-login button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 280px;
+      padding: 10px;
+      margin: 8px auto;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      color: white;
+    }
+
+    .social-login button:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .social-login button .fa-brands {
+      font-size: 20px;
+      vertical-align: middle;
+    }
+
+    .google {
+      background-color: #4285f4;
+      box-shadow: 0 0 8px #4285f4;
+    }
+
+    .google:hover:not(:disabled) {
+      background-color: #357ae8;
+    }
+
+    .microsoft {
+      background-color: #f65314;
+      box-shadow: 0 0 8px #f65314;
+    }
+
+    .microsoft:hover:not(:disabled) {
+      background-color: #d64710;
+    }
+
+    .apple {
+      background-color: #333333;
+      box-shadow: 0 0 8px #333333;
+    }
+
+    .apple:hover:not(:disabled) {
+      background-color: #1a1a1a;
+    }
+
+    @media (max-width: 420px) {
+      .form-wrapper {
+        width: 90vw;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sign In Form -->
+  <div id="signin" class="form-container active">
+    <div class="form-wrapper">
+      <form id="signinForm" class="auth-form" novalidate>
+        <h2>Sign In</h2>
+        <input type="text" id="signinUsername" placeholder="Username" required />
+        <input type="password" id="signinPassword" placeholder="Password" required />
+        <button id="signinBtn" type="submit">Login</button>
+
+        <div class="social-login">
+          <p>Or sign in with:</p>
+          <button type="button" id="googleLogin" class="google">
+            <i class="fab fa-google"></i> Google
+          </button>
+          <button type="button" id="microsoftLogin" class="microsoft">
+            <i class="fab fa-windows"></i> Microsoft
+          </button>
+          <button type="button" id="appleLogin" class="apple">
+            <i class="fab fa-apple"></i> Apple
+          </button>
+        </div>
+
+        <p class="switch-text">Don't have an account? <a id="toSignup" href="#">Sign up</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sign Up Form -->
+  <div id="signup" class="form-container">
+    <div class="form-wrapper">
+      <form id="signupForm" class="auth-form" novalidate>
+        <h2>Sign Up</h2>
+        <input type="text" id="firstName" placeholder="First Name" required />
+        <input type="text" id="lastName" placeholder="Last Name" required />
+        <input type="date" id="birthdate" placeholder="Date of Birth" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="text" id="signupUsername" placeholder="Username" required />
+        <input type="password" id="signupPassword" placeholder="Password" required />
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+        <button id="signupBtn" type="submit">Register</button>
+
+        <div class="social-login">
+          <p>Or sign up with:</p>
+          <button type="button" id="googleSignup" class="google">
+            <i class="fab fa-google"></i> Google
+          </button>
+          <button type="button" id="microsoftSignup" class="microsoft">
+            <i class="fab fa-windows"></i> Microsoft
+          </button>
+          <button type="button" id="appleSignup" class="apple">
+            <i class="fab fa-apple"></i> Apple
+          </button>
+        </div>
+
+        <p class="switch-text">Already have an account? <a id="toSignin" href="#">Sign in</a></p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const signupContainer = document.getElementById('signup');
+    const signinContainer = document.getElementById('signin');
+    const toSignupLink = document.getElementById('toSignup');
+    const toSigninLink = document.getElementById('toSignin');
+
+    function showSignup() {
+      signupContainer.classList.add('active');
+      signinContainer.classList.remove('active');
+    }
+    function showSignin() {
+      signinContainer.classList.add('active');
+      signupContainer.classList.remove('active');
+    }
+
+    toSignupLink.addEventListener('click', e => {
+      e.preventDefault();
+      showSignup();
+    });
+    toSigninLink.addEventListener('click', e => {
+      e.preventDefault();
+      showSignin();
+    });
+
+    function isValidEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    function isStrongPassword(pw) {
+      const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+      return re.test(pw);
+    }
+    function isValidBirthdate(birthdate) {
+      if (!birthdate) return false;
+      const date = new Date(birthdate);
+      if (isNaN(date)) return false;
+      const ageDifMs = Date.now() - date.getTime();
+      const ageDate = new Date(ageDifMs);
+      const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+      return age >= 13;
+    }
+
+    // Register submit
+    document.getElementById('signupForm').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const birthdate = document.getElementById('birthdate').value;
+      const email = document.getElementById('email').value.trim();
+      const username = document.getElementById('signupUsername').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (!firstName || !lastName || !birthdate || !email || !username || !password || !confirmPassword) {
+        return Swal.fire('Error', 'Please fill in all fields', 'error');
+      }
+      if (!isValidEmail(email)) {
+        return Swal.fire('Error', 'Please enter a valid email address', 'error');
+      }
+      if (!isValidBirthdate(birthdate)) {
+        return Swal.fire('Error', 'You must be at least 13 years old to register', 'error');
+      }
+      if (!isStrongPassword(password)) {
+        return Swal.fire('Error', 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character', 'error');
+      }
+      if (password !== confirmPassword) {
+        return Swal.fire('Error', 'Passwords do not match', 'error');
+      }
+
+      const signupBtn = document.getElementById('signupBtn');
+      signupBtn.disabled = true;
+      signupBtn.textContent = 'Registering...';
+
+      const payload = {
+        firstname: firstName,
+        lastname: lastName,
+        birthdate: birthdate,
+        email: email,
+        username: username,
+        password: password,
+        comfirmPassword: confirmPassword
+      };
+
+      try {
+        const response = await axios.post('https://688e3065a459d5566b1454a0.mockapi.io/api/v1/members', payload);
+
+        if (response.status === 201) {
+          await Swal.fire('Success', 'Registered successfully', 'success');
+          document.getElementById('signupForm').reset();
+          showSignin();
+        } else {
+          Swal.fire('Error', 'Registration failed. Please try again.', 'error');
+        }
+      } catch (error) {
+        Swal.fire('Error', error.response?.data || 'Registration failed. Please try again.', 'error');
+      } finally {
+        signupBtn.disabled = false;
+        signupBtn.textContent = 'Register';
+      }
+    });
+
+    // Login submit
+    document.getElementById('signinForm').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const username = document.getElementById('signinUsername').value.trim();
+      const password = document.getElementById('signinPassword').value;
+
+      if (!username || !password) {
+        return Swal.fire('Error', 'Please fill in all fields', 'error');
+      }
+
+      const signinBtn = document.getElementById('signinBtn');
+      signinBtn.disabled = true;
+      signinBtn.textContent = 'Logging in...';
+
+      try {
+        // MockAPI doesn't support login validation, so just simulate success if username exists
+        const response = await axios.get('https://688e3065a459d5566b1454a0.mockapi.io/api/v1/members');
+        const users = response.data;
+
+        const user = users.find(u => u.username === username);
+        
+        if (!user) {
+          Swal.fire('Error', 'User not found', 'error');
+        } else if (user.password !== password) {
+          Swal.fire('Error', 'Invalid password', 'error');
+        } else {
+          await Swal.fire('Success', 'Logged in successfully', 'success');
+          // Redirect or further action here
+        }
+      } catch (error) {
+        Swal.fire('Error', 'Login failed. Please try again.', 'error');
+      } finally {
+        signinBtn.disabled = false;
+        signinBtn.textContent = 'Login';
+      }
+    });
+
+    // Optional: handlers for social buttons
+    const socialButtons = ['googleLogin', 'microsoftLogin', 'appleLogin', 'googleSignup', 'microsoftSignup', 'appleSignup'];
+    socialButtons.forEach(id => {
+      document.getElementById(id).addEventListener('click', () => {
+        Swal.fire('Info', `Social login/signup with ${id.replace(/(Login|Signup)/, '')} is not implemented.`, 'info');
+      });
+    });
+  </script>
+
+</body>
+</html>
